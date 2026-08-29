@@ -1,0 +1,25 @@
+# Keeps Formula/daily-briefing.rb in lockstep with the latest daily-briefing release.
+# Zero-credential: reads the public release, pushes to THIS repo with the default token.
+name: Sync formula
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # every 6h — release latency bound; workflow_dispatch for instant
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate formula from latest release
+        run: bash scripts/sync-formula.sh
+      - name: Commit if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then echo "formula already current"; exit 0; fi
+          git config user.name "tap-sync[bot]"
+          git config user.email "tap-sync@users.noreply.github.com"
+          git add Formula/daily-briefing.rb
+          git commit -m "daily-briefing $(sed -n 's/.*version \"\(.*\)\".*/\1/p' Formula/daily-briefing.rb | head -1) — auto-sync from latest release"
+          git push
