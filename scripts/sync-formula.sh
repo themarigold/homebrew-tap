@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-REPO="themarigold/daily-briefing"
+REPO="norn-app/daily-briefing"
 TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -1)
 [ -n "$TAG" ] || { echo "could not resolve latest release tag" >&2; exit 1; }
 VERSION="${TAG#v}"
